@@ -12,16 +12,16 @@ import os
 
 # Вводим ссылку на сайт
 
-print("Введите ссылку на мангу с сайта readmanga.me или adultmanga.ru")
+print("Введите ссылку на мангу с сайта readmanga.me, adultmanga.ru или mintmanga.com")
 
 link = input()
 link_components = urllib.parse.urlparse(link)
 
-if (link_components.netloc == 'readmanga.me' or link_components.netloc == 'adultmanga.ru') and (link_components.path[1:].find('/') == -1):
+if (link_components.netloc == 'readmanga.me' or link_components.netloc == 'adultmanga.ru' or link_components.netloc == 'mintmanga.com') and (link_components.path[1:].find('/') == -1):
     manga_name = link_components.path[1:]
     chapters = mangadownloader.MangaDownloader.get_chapters_list('http://'+link_components.netloc+'/'+manga_name)
     chapters_list = []
-    #Getting chapters list
+    # Getting chapters list
     if chapters == 1 or chapters == 2:
         print('Невозможно скачать мангу в данный момент.')
     else:
@@ -60,7 +60,7 @@ if (link_components.netloc == 'readmanga.me' or link_components.netloc == 'adult
                     ch_path = os.path.join(work_directory, manga_name, 'vol'+str(chapter['vol']), 'ch'+str(chapter['ch']))
                     if not os.path.exists(ch_path):
                         os.mkdir(ch_path)
-                    #Download manga to directory
+                    # Download manga to directory
                     print('Скачиваем том ' + str(chapter['vol']) + ", главу " + str(chapter['ch']) + '...')
                     print('http://'+link_components.netloc+chapter['link'])
                     mangadownloader.MangaDownloader.download_chapters('http://'+link_components.netloc+chapter['link'], ch_path)

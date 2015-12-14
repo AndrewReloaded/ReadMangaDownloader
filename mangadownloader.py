@@ -44,7 +44,7 @@ class MangaDownloader:
                         lnk = chapter.attrib['href']
                         lnk += "?mature=1"
                         links.append(lnk)
-						#links.append(chapter.attrib['href'])
+						# links.append(chapter.attrib['href'])
         if len(links) == 0:
             return 2
         return links
@@ -61,34 +61,43 @@ class MangaDownloader:
             return 1
         text = page.read().decode(encoding="UTF-8")
         doc = lxml.html.document_fromstring(str(text))
-        # Ищем ссылки на данное изображение
+
+        # Andrew 14.12.2015 >> Переписан алгоритм сбора ссылок на картинки в связи с изменениями в коде страницы
+        # Ищем скрипт с функцией инициализации
         for element in doc.xpath("/html/body/div[6]/script[1]"):
-            if element.text.find('pictures') != -1:
+            if element.text.find('rm_h.init') != -1:
                 script_text = element.text
         try:
             script_lines = script_text.split("\n")
         except:
-            #Если не существует, то глав не найдено-с
+            # Если не существует, то глав не найдено
             return 1
+        # Ищем в скрипте функцию инициализации, в которой содержатся ссылки на картинки
         for line in script_lines:
-            if line.find('var pictures') != -1:
+            if line.find('rm_h.init') != -1:
                 pictures_line = line
-        pictures_line = pictures_line.split('=')[1]
+        # Убираем из строки начальные и конечные части и кавычки, чтобы они не мешали разбиению строки
+        pictures_line = pictures_line.replace('rm_h.init([[', '')
+        pictures_line = pictures_line.replace(']], 0, false);', '')
+        pictures_line = pictures_line.replace("'", '')
+        # Разбиваем строку на подстроки с кусками ссылок на картинки
+        pictures_line = pictures_line.split('],[')
         links = []
-        #Устанавливаем левую и правую границы поиска
-        n1 = 0
-        n2 = 0
-        while (n1 != -1 and n2 != -1):
-            n1 = pictures_line.find("url:", n2)
-            n2 = pictures_line.find(",w:", n1)
-            if (n1 != -1 and n2 != -1):
-                link = pictures_line[n1+5:n2-1]
-                links.append(link)
+        for line in pictures_line:
+            # ['auto/06/98','http://e1.postfact.ru/','/17/000.jpg_res.jpg',1800,750]
+            # http://e1.postfact.ru/auto/06/98/17/000.jpg_res.jpg
+            line = line.split(',')
+            link = (line[1]+line[0]+line[2]).replace(' ', '')
+            links.append(link)
+        # << Andrew
+
         if len(links) < 1:
             return 4
         for download_link in links:
-            #Скачиваем изображение в нужную папку
+            # Скачиваем изображение в нужную папку
+            # TODO: не скачивать уже скачанные файлы os.path.isfile(...)
             filename = download_link.split("/")[-1]
+            # print(filename)
             try:
                 image_file = urllib.request.urlretrieve(download_link, os.path.join(path, filename))
             except:
@@ -97,4 +106,5 @@ class MangaDownloader:
                     image_file = urllib.request.urlretrieve(download_link, os.path.join(path, filename))
                 except:
                     print('Error while downloading file ' + download_link + ", passing...")
+
         return 0
