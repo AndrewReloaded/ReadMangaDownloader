@@ -77,14 +77,18 @@ class MangaDownloader:
             if line.find('rm_h.init') != -1:
                 pictures_line = line
         # Убираем из строки начальные и конечные части и кавычки, чтобы они не мешали разбиению строки
-        pictures_line = pictures_line.replace('rm_h.init([[', '')
-        pictures_line = pictures_line.replace(']], 0, false);', '')
+        # rm_h.init([[ нужная подстрока ]], что-то еще
+        start = pictures_line.find('[[') + 2
+        end = pictures_line.find(']]') - 1
+        pictures_line = pictures_line[start : end]
         pictures_line = pictures_line.replace("'", '')
+        pictures_line = pictures_line.replace('"', '')
         # Разбиваем строку на подстроки с кусками ссылок на картинки
         pictures_line = pictures_line.split('],[')
         links = []
         for line in pictures_line:
             # ['auto/06/98','http://e1.postfact.ru/','/17/000.jpg_res.jpg',1800,750]
+            # должно превратиться в
             # http://e1.postfact.ru/auto/06/98/17/000.jpg_res.jpg
             line = line.split(',')
             link = (line[1]+line[0]+line[2]).replace(' ', '')
