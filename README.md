@@ -20,9 +20,8 @@ Chagelog
 1. Устанавить пакеты, необходимые для сборки и установки библиотек с помощью комманды
 sudo apt-get install python3-setuptools python3-dev libxml2-dev libxslt1-dev zlib1g-dev
 2. Устанавить библиотеки с помощью комманд
-sudo easy_install3 lxml
-sudo easy_install3 cssselect
-lxml будет собираться из исходников
+sudo easy_install3 lxml cssselect
+(lxml будет собираться из исходников)
 3. Для запуска исользовать комманду
 python3 console.py
 
